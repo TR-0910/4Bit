@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8e4d9 0%, #a4b5a0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f8f6f0; /* Beige background */
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 80vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 300px;
+            background: #6b8e6b; /* Sage green */
+            color: white;
+            padding: 0;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid #5a7a5a;
+        }
+
+        .section-header {
+            padding: 20px;
+            background: #5a7a5a; /* Darker sage green */
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header:hover {
+            background: #4a6a4a;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: white; /* White text for section headers */
+        }
+
+        .arrow {
+            transition: transform 0.3s ease;
+            color: white; /* White arrows */
+        }
+
+        .arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: #6b8e6b;
+        }
+
+        .section-content.expanded {
+            padding: 20px;
+            max-height: 1000px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            background: #f8f6f0; /* Beige */
+        }
+
+        .content-area {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #5a7a5a; /* Sage green text */
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1ccc0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            background: #fffdf6; /* Light beige */
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #6b8e6b; /* Sage green */
+            background: white;
+        }
+
+        .form-control:invalid {
+            border-color: #e74c3c;
+        }
+
+        .form-control:valid {
+            border-color: #27ae60;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #6b8e6b; /* Sage green */
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a7a5a;
+        }
+
+        .btn-success {
+            background: #8a9b6b; /* Olive green */
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #7a8b5b;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Table Styles */
+        .credentials-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .credentials-table th,
+        .credentials-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .credentials-table th {
+            background: #5a7a5a; /* Sage green */
+            color: white;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .status-verified {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .status-verifying {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .file-upload {
+            border: 2px dashed #b8c6b1;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            background: #f8f6f0;
+        }
+
+        .file-upload:hover {
+            border-color: #6b8e6b;
+        }
+
+        .file-upload input {
+            margin: 15px 0;
+        }
+
+        /* Phone number validation styles */
+        .phone-hint {
+            font-size: 12px;
+            color: #d1ccc0;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        h2, h3, h4 {
+            color: #5a7a5a; /* Sage green headings */
+        }
+
+        p {
+            color: #666;
+        }
+
+        /* DID Display Styles */
+        .did-display {
+            background: #5a7a5a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .did-value {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #fff;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        .did-label {
+            color: #b8c6b1;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        /* DID Section Styles */
+        .did-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .did-section p {
+            color: white;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .did-section button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Credential Fields Styles */
+        .credential-fields {
+            border-left: 3px solid #6b8e6b;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+
+        .action-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- DID Display at the top -->
+            <div class="did-display">
+                <div class="did-label">YOUR DECENTRALIZED IDENTIFIER</div>
+                <div class="did-value" id="sidebar-did">did:user:9f3b2c1dA4...</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection('identity')">
+                    <h3>📱 My Identity</h3>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content expanded" id="identity-content">
+                    <!-- DID Section -->
+                    <div class="did-section">
+                        <label style="color: white;"><strong>DID:</strong></label>
+                        <p id="did-display">did:user:9f3b2c1dA4...</p>
+                        <button class="btn btn-secondary" onclick="generateDID()">Generate New DID</button>
+                    </div>
+
+                    <form id="identity-form">
+                        <div class="form-group">
+                            <label style="color: white;" for="fullName">Full Name</label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: white;" for="contactNumber">Contact Number</label>
+                            <input type="tel" id="contactNumber" class="form-control" 
+                                   placeholder="Enter 10-digit number" 
+                                   pattern="[0-9]{10}"
+                                   maxlength="10"
+                                   required>
+                            <div class="phone-hint">Must be exactly 10 digits</div>
+                            <div class="error-message" id="phone-error">Please enter a valid 10-digit phone number</div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="updateIdentity()" style="width: 100%;">
+                            Update Identity
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection('credentials')">
+                    <h3>📄 My Credentials</h3>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="credentials-content">
+                    <button type="button" class="btn btn-success" onclick="showContent('credentials-main')" style="width: 100%; margin-bottom: 15px;">
+                        Manage Credentials
+                    </button>
+                    <div style="font-size: 12px; color: #d1ccc0;">
+                        <p id="credentials-count">📋 2 credentials pending</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection('upload')">
+                    <h3>☁️ Upload to IPFS</h3>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="upload-content">
+                    <div class="file-upload">
+                        <p>Upload documents to decentralized IPFS storage</p>
+                        <input type="file" class="form-control">
+                        <button type="button" class="btn btn-primary" onclick="showContent('upload-main')" style="width: 100%;">
+                            Upload Document
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Identity Content -->
+            <div id="identity-main" class="content-area active">
+                <h2>👤 My Identity</h2>
+                <p>Manage your personal identity information</p>
+                
+                <div class="did-display" style="background: #6b8e6b; max-width: 500px;">
+                    <div class="did-label">ACTIVE DECENTRALIZED IDENTIFIER</div>
+                    <div class="did-value" id="main-did">did:user:9f3b2c1dA4...</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 10px; margin-top: 20px; max-width: 500px;">
+                    <div class="form-group">
+                        <label for="displayFullName">Full Name</label>
+                        <input type="text" id="displayFullName" class="form-control" value="Not set" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="displayContactNumber">Contact Number</label>
+                        <input type="text" id="displayContactNumber" class="form-control" value="Not set" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Identity Status</label>
+                        <div style="padding: 10px; background: #fff3cd; border-radius: 5px; color: #856404;">
+                            ⚠️ Identity information pending
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credentials Content -->
+            <div id="credentials-main" class="content-area">
+                <h2>📄 My Credentials</h2>
+                <p>Manage your digital credentials and documents</p>
+                
+                <div class="did-display" style="background: #6b8e6b; margin-bottom: 20px;">
+                    <div class="did-label">VERIFICATION IDENTIFIER</div>
+                    <div class="did-value" id="credentials-did">did:user:9f3b2c1dA4...</div>
+                </div>
+
+                <table class="credentials-table">
+                    <thead>
+                        <tr>
+                            <th>Credential</th>
+                            <th>Issuer</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="credentials-table-body">
+                        <!-- Credentials will be dynamically added here -->
+                    </tbody>
+                </table>
+                
+                <!-- Add New Credential Section -->
+                <div style="margin-top: 30px; background: white; padding: 25px; border-radius: 10px;">
+                    <h3>➕ Add New Credential</h3>
+                    <form id="add-credential-form">
+                        <div class="form-group">
+                            <label for="credentialType">Select Credential Type</label>
+                            <select id="credentialType" class="form-control" onchange="showCustomFields()">
+                                <option value="">-- Select Credential Type --</option>
+                                <option value="aadhaar">🆔 Aadhaar Card</option>
+                                <option value="pan">💳 PAN Card</option>
+                                <option value="dl">🚗 Driving License</option>
+                                <option value="passport">🛂 Passport</option>
+                                <option value="education">🎓 Education Certificate</option>
+                                <option value="voter">🗳️ Voter ID</option>
+                            </select>
+                        </div>
+
+                        <!-- Aadhaar Specific Fields -->
+                        <div id="aadhaar-fields" class="credential-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="aadhaarNumber">Aadhaar Number</label>
+                                <input type="text" id="aadhaarNumber" class="form-control" placeholder="Enter 12-digit Aadhaar number" maxlength="12" pattern="[0-9]{12}">
+                            </div>
+                            <div class="form-group">
+                                <label for="aadhaarFile">Upload Aadhaar Card (PDF/Image)</label>
+                                <input type="file" id="aadhaarFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+
+                        <!-- PAN Card Specific Fields -->
+                        <div id="pan-fields" class="credential-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="panNumber">PAN Number</label>
+                                <input type="text" id="panNumber" class="form-control" placeholder="Enter PAN number (e.g., ABCDE1234F)" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}">
+                            </div>
+                            <div class="form-group">
+                                <label for="panFile">Upload PAN Card (PDF/Image)</label>
+                                <input type="file" id="panFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+
+                        <!-- Generic Fields for other credentials -->
+                        <div id="generic-fields" class="credential-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="documentNumber">Document Number</label>
+                                <input type="text" id="documentNumber" class="form-control" placeholder="Enter document number">
+                            </div>
+                            <div class="form-group">
+                                <label for="issuingAuthority">Issuing Authority</label>
+                                <input type="text" id="issuingAuthority" class="form-control" placeholder="Enter issuing authority">
+                            </div>
+                            <div class="form-group">
+                                <label for="documentFile">Upload Document (PDF/Image)</label>
+                                <input type="file" id="documentFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="form-group">
+                            <label for="issueDate">Issue Date</label>
+                            <input type="date" id="issueDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="expiryDate">Expiry Date (if any)</label>
+                            <input type="date" id="expiryDate" class="form-control">
+                        </div>
+                        
+                        <button type="button" class="btn btn-success" onclick="addNewCredential()">Add Credential</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Upload Content -->
+            <div id="upload-main" class="content-area">
+                <h2>☁️ Document Storage</h2>
+                <p>Upload your documents to decentralized IPFS storage</p>
+
+                <div class="did-display" style="background: #6b8e6b; margin-bottom: 20px;">
+                    <div class="did-label">STORAGE IDENTIFIER</div>
+                    <div class="did-value" id="upload-did">did:user:9f3b2c1dA4...</div>
+                </div>
+                
+                <div class="file-upload" style="max-width: 500px; margin: 30px 0;">
+                    <h4>📤 Upload Document</h4>
+                    <input type="file" class="form-control" multiple>
+                    <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                        Upload to IPFS
+                    </button>
+                    <p style="margin-top: 15px; font-size: 12px; color: #7f8c8d;">
+                        🔒 Store documents securely on the blockchain
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 10px;">
+                    <h3>📂 Uploaded Documents</h3>
+                    <p style="color: #999; font-style: italic;">No documents uploaded yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Essential credentials with predefined issuers
+        const essentialCredentials = {
+            'aadhaar': { name: '🆔 Aadhaar Card', issuer: 'UIDAI, Government of India' },
+            'pan': { name: '💳 PAN Card', issuer: 'Income Tax Department, India' },
+            'dl': { name: '🚗 Driving License', issuer: 'Regional Transport Office' },
+            'passport': { name: '🛂 Passport', issuer: 'Ministry of External Affairs' },
+            'education': { name: '🎓 Education Certificate', issuer: 'University/Board' },
+            'voter': { name: '🗳️ Voter ID', issuer: 'Election Commission of India' }
+        };
+
+        // Generate random DID
+        function generateDID() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let randomPart = '';
+            for (let i = 0; i < 12; i++) {
+                randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const newDID = `did:user:${randomPart}...`;
+            
+            // Update all DID displays
+            document.getElementById('did-display').textContent = newDID;
+            document.getElementById('sidebar-did').textContent = newDID;
+            document.getElementById('main-did').textContent = newDID;
+            document.getElementById('credentials-did').textContent = newDID;
+            document.getElementById('upload-did').textContent = newDID;
+            
+            alert('New DID generated successfully!');
+        }
+
+        // Toggle sidebar sections
+        function toggleSection(section) {
+            const content = document.getElementById(section + '-content');
+            const arrow = content.previousElementSibling.querySelector('.arrow');
+            
+            // Toggle current section
+            content.classList.toggle('expanded');
+            arrow.classList.toggle('expanded');
+        }
+
+        // Show main content based on sidebar click
+        function showContent(contentId) {
+            // Hide all content areas
+            const contentAreas = document.querySelectorAll('.content-area');
+            contentAreas.forEach(area => area.classList.remove('active'));
+            
+            // Show selected content area
+            document.getElementById(contentId).classList.add('active');
+        }
+
+        // Update identity information
+        function updateIdentity() {
+            const fullName = document.getElementById('fullName').value;
+            const contactNumber = document.getElementById('contactNumber').value;
+            
+            if (fullName && contactNumber.length === 10) {
+                document.getElementById('displayFullName').value = fullName;
+                document.getElementById('displayContactNumber').value = contactNumber;
+                
+                // Show success message
+                alert('Identity updated successfully!');
+                
+                // Switch to identity view
+                showContent('identity-main');
+            } else {
+                alert('Please fill all fields correctly. Phone must be 10 digits.');
+            }
+        }
+
+        // Phone number validation
+        document.getElementById('contactNumber').addEventListener('input', function(e) {
+            const phoneInput = e.target;
+            const errorElement = document.getElementById('phone-error');
+            const value = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+            
+            // Update input value with only numbers
+            phoneInput.value = value;
+            
+            // Validate length
+            if (value.length === 10) {
+                phoneInput.setCustomValidity('');
+                errorElement.style.display = 'none';
+            } else {
+                phoneInput.setCustomValidity('Phone number must be 10 digits');
+                errorElement.style.display = 'block';
+            }
+        });
+
+        // Prevent non-numeric input
+        document.getElementById('contactNumber').addEventListener('keypress', function(e) {
+            const charCode = e.which ? e.which : e.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                e.preventDefault();
+            }
+        });
+
+        // Show/hide specific fields based on credential type
+        function showCustomFields() {
+            // Hide all fields first
+            document.querySelectorAll('.credential-fields').forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            const selectedType = document.getElementById('credentialType').value;
+            
+            if (selectedType === 'aadhaar') {
+                document.getElementById('aadhaar-fields').style.display = 'block';
+            } else if (selectedType === 'pan') {
+                document.getElementById('pan-fields').style.display = 'block';
+            } else if (selectedType) {
+                document.getElementById('generic-fields').style.display = 'block';
+            }
+        }
+
+        // Add new credential to the table
+        function addNewCredential() {
+            const type = document.getElementById('credentialType').value;
+            const typeDisplay = document.getElementById('credentialType').selectedOptions[0].text;
+            
+            if (!type) {
+                alert('Please select a credential type');
+                return;
+            }
+
+            let number, issuer;
+            
+            if (type === 'aadhaar') {
+                number = document.getElementById('aadhaarNumber').value;
+                issuer = 'UIDAI, Government of India';
+                if (!number || number.length !== 12) {
+                    alert('Please enter a valid 12-digit Aadhaar number');
+                    return;
+                }
+            } else if (type === 'pan') {
+                number = document.getElementById('panNumber').value;
+                issuer = 'Income Tax Department, India';
+                if (!number || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(number)) {
+                    alert('Please enter a valid PAN number (Format: ABCDE1234F)');
+                    return;
+                }
+            } else {
+                number = document.getElementById('documentNumber').value;
+                issuer = document.getElementById('issuingAuthority').value;
+                if (!number || !issuer) {
+                    alert('Please fill all required fields');
+                    return;
+                }
+            }
+
+            // Add to credentials table
+            addCredentialToTable(typeDisplay, issuer, type.toUpperCase(), number);
+            
+            // Reset form
+            document.getElementById('add-credential-form').reset();
+            document.querySelectorAll('.credential-fields').forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            alert('Credential added successfully! Status: Pending Verification');
+        }
+
+        // Add credential row to the table
+        function addCredentialToTable(credential, issuer, type, number) {
+            const tbody = document.getElementById('credentials-table-body');
+            const newRow = document.createElement('tr');
+            
+            newRow.innerHTML = `
+                <td>${credential}</td>
+                <td>${issuer}</td>
+                <td>${type}</td>
+                <td class="status-pending">⏳ Pending</td>
+                <td class="action-wrapper">
+                    <button class="btn btn-primary btn-small" onclick="viewCredential('${number}')">View</button>
+                    <button class="btn btn-warning btn-small" onclick="verifyCredential(this)">Verify</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteCredential(this)">Delete</button>
+                </td>
+            `;
+            
+            tbody.appendChild(newRow);
+            updateCredentialsCount();
+        }
+
+        // Verify credential (simulate verification process)
+        function verifyCredential(button) {
+            const row = button.closest('tr');
+            const statusCell = row.querySelector('.status-pending');
+            
+            statusCell.innerHTML = '🔄 Verifying...';
+            statusCell.className = 'status-verifying';
+            
+            // Simulate verification process
+            setTimeout(() => {
+                statusCell.innerHTML = '✅ Verified';
+                statusCell.className = 'status-verified';
+                button.style.display = 'none'; // Hide verify button after verification
+                updateCredentialsCount();
+                showSuccessConfetti();
+            }, 2000);
+        }
+
+        // Delete credential
+        function deleteCredential(button) {
+            if (confirm('Are you sure you want to delete this credential?')) {
+                const row = button.closest('tr');
+                row.remove();
+                updateCredentialsCount();
+                alert('Credential deleted successfully!');
+            }
+        }
+
+        // View credential details
+        function viewCredential(number) {
+            alert(`Credential Number: ${number}\n\nThis would show full credential details in a real implementation.`);
+        }
+
+        // Update credentials count in sidebar
+        function updateCredentialsCount() {
+            const tbody = document.getElementById('credentials-table-body');
+            const totalCredentials = tbody.children.length;
+            const pendingCredentials = Array.from(tbody.children).filter(row => 
+                row.querySelector('.status-pending') || row.querySelector('.status-verifying')
+            ).length;
+            
+            document.getElementById('credentials-count').textContent = 
+                `📋 ${pendingCredentials} of ${totalCredentials} credentials pending`;
+        }
+
+        // Show success confetti
+        function showSuccessConfetti() {
+            // Simple confetti effect
+            const confetti = document.createElement('div');
+            confetti.innerHTML = '🎉';
+            confetti.style.position = 'fixed';
+            confetti.style.top = '20px';
+            confetti.style.right = '20px';
+            confetti.style.fontSize = '30px';
+            confetti.style.zIndex = '1000';
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                document.body.removeChild(confetti);
+            }, 2000);
+        }
+
+        // Initialize with identity section expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Identity section starts expanded
+            document.getElementById('identity-content').classList.add('expanded');
+            document.querySelector('#identity-content').previousElementSibling.querySelector('.arrow').classList.add('expanded');
+            
+            // Add some default credentials
+            addCredentialToTable('🆔 Aadhaar Card', 'UIDAI, Government of India', 'AADHAAR', 'XXXX-XXXX-1234');
+            addCredentialToTable('💳 PAN Card', 'Income Tax Department, India', 'PAN', 'ABCDE1234F');
+        });
+        // =====================
+// AUTOMATIC SESSION TIMEOUT
+// =====================
+
+let inactivityTimer;
+const SESSION_TIMEOUT = 1 * 60 * 1000; // 1 minute in milliseconds
+const WARNING_TIME = 30 * 1000; // Show warning 30 seconds before timeout
+
+// Start the inactivity timer
+function startInactivityTimer() {
+    resetInactivityTimer();
+    
+    // Listen for user activity
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+    document.addEventListener('scroll', resetInactivityTimer);
+}
+
+// Reset timer on user activity
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    
+    // Clear any existing warning
+    const existingWarning = document.getElementById('session-warning');
+    if (existingWarning) {
+        existingWarning.remove();
+    }
+    
+    // Set new timeout
+    inactivityTimer = setTimeout(showTimeoutWarning, SESSION_TIMEOUT - WARNING_TIME);
+}
+
+// Show warning before timeout
+function showTimeoutWarning() {
+    // Create warning modal
+    const warningModal = document.createElement('div');
+    warningModal.id = 'session-warning';
+    warningModal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                   background: rgba(0,0,0,0.5); z-index: 9999; display: flex; 
+                   align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 10px; 
+                       text-align: center; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                <h3 style="color: #e74c3c; margin-bottom: 15px;">🕒 Session About to Expire</h3>
+                <p>Your session will expire in <strong id="countdown">30</strong> seconds due to inactivity.</p>
+                <p style="font-size: 14px; color: #666; margin: 15px 0;">
+                    Move your mouse or press any key to continue your session.
+                </p>
+                <button onclick="extendSession()" style="background: #6b8e6b; color: white; 
+                       border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;
+                       font-size: 16px; margin-top: 10px;">
+                    Continue Session
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(warningModal);
+    
+    // Start countdown
+    let secondsLeft = 30;
+    const countdownElement = document.getElementById('countdown');
+    const countdownInterval = setInterval(() => {
+        secondsLeft--;
+        countdownElement.textContent = secondsLeft;
+        
+        if (secondsLeft <= 0) {
+            clearInterval(countdownInterval);
+            lockSession();
+        }
+    }, 1000);
+    
+    // Set final timeout
+    inactivityTimer = setTimeout(lockSession, WARNING_TIME);
+}
+
+// Extend session when user interacts
+function extendSession() {
+    resetInactivityTimer();
+    const warningModal = document.getElementById('session-warning');
+    if (warningModal) {
+        warningModal.remove();
+    }
+    showToast('Session extended!', 'success');
+}
+
+// Lock the session
+function lockSession() {
+    const lockScreen = document.createElement('div');
+    lockScreen.id = 'session-lock';
+    lockScreen.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                   background: linear-gradient(135deg, #e8e4d9 0%, #a4b5a0 100%); 
+                   z-index: 10000; display: flex; align-items: center; justify-content: center;
+                   color: #5a7a5a; text-align: center;">
+            <div style="background: #f8f6f0; padding: 40px; border-radius: 15px; 
+                       box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 450px;
+                       border-left: 6px solid #6b8e6b;">
+                <h1 style="font-size: 2.5em; margin-bottom: 20px; color: #5a7a5a;">🔒 Session Locked</h1>
+                <p style="font-size: 1.2em; margin-bottom: 30px; color: #666;">
+                    Your session has expired due to inactivity.
+                </p>
+                <button onclick="unlockSession()" style="background: #6b8e6b; color: white; 
+                       border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer;
+                       font-size: 1.1em; font-weight: bold; transition: background 0.3s ease;">
+                    Continue to Dashboard
+                </button>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #8a9b6b;">
+                    For security, your session automatically locks after 5 minutes of inactivity.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(lockScreen);
+    
+    // Clear any user data from memory (but keep in localStorage)
+    document.getElementById('displayFullName').value = 'Session Locked';
+    document.getElementById('displayContactNumber').value = 'Session Locked';
+}
+
+// Unlock session
+function unlockSession() {
+    const lockScreen = document.getElementById('session-lock');
+    if (lockScreen) {
+        lockScreen.remove();
+    }
+    
+    resetInactivityTimer();
+    showToast('Welcome back!', 'success');
+    
+    // Restore user data
+    const savedName = localStorage.getItem('userFullName');
+    const savedContact = localStorage.getItem('userContact');
+    
+    if (savedName) {
+        document.getElementById('displayFullName').value = savedName;
+    }
+    if (savedContact) {
+        document.getElementById('displayContactNumber').value = savedContact;
+    }
+}
+
+// Show toast notifications
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed; top: 20px; right: 20px; padding: 15px 20px; 
+        border-radius: 5px; color: white; z-index: 10001; font-weight: bold;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    if (type === 'success') {
+        toast.style.background = '#27ae60';
+    } else if (type === 'error') {
+        toast.style.background = '#e74c3c';
+    } else {
+        toast.style.background = '#3498db';
+    }
+    
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Save user data before locking
+function updateIdentity() {
+    const fullName = document.getElementById('fullName').value;
+    const contactNumber = document.getElementById('contactNumber').value;
+    
+    if (fullName && contactNumber.length === 10) {
+        document.getElementById('displayFullName').value = fullName;
+        document.getElementById('displayContactNumber').value = contactNumber;
+        
+        // Save to localStorage for session recovery
+        localStorage.setItem('userFullName', fullName);
+        localStorage.setItem('userContact', contactNumber);
+        
+        showToast('Identity updated successfully!', 'success');
+        showContent('identity-main');
+    } else {
+        showToast('Please fill all fields correctly. Phone must be 10 digits.', 'error');
+    }
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize session timeout when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startInactivityTimer();
+    
+    // Load saved user data
+    const savedName = localStorage.getItem('userFullName');
+    const savedContact = localStorage.getItem('userContact');
+    
+    if (savedName && savedName !== 'Session Locked') {
+        document.getElementById('displayFullName').value = savedName;
+    }
+    if (savedContact && savedContact !== 'Session Locked') {
+        document.getElementById('displayContactNumber').value = savedContact;
+    }
+});
+    </script>
+</body>
+</html>
