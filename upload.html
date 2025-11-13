@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents to IPFS - CredSync</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f5f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .upload-screen {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #40502f;
+        }
+
+        h2 {
+            color: #40502f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .back-btn {
+            background-color: #7fa27e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background-color: #6b8f6a;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #9CAF88;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #40502f;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #7A8C69;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f4e4;
+            border-radius: 5px;
+            border-left: 4px solid #40502f;
+        }
+
+        .result a {
+            color: #40502f;
+            word-break: break-all;
+            text-decoration: none;
+        }
+
+        .result a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            color: #7A8C69;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .file-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 3px solid #9CAF88;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-screen">
+        <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+        
+        <h2>📤 Upload Documents to IPFS</h2>
+        
+        <div class="file-info" id="file-info" style="display: none;">
+            <strong>Selected File:</strong> <span id="file-name"></span>
+            <br>
+            <strong>Size:</strong> <span id="file-size"></span>
+        </div>
+
+        <input type="file" id="file-input" />
+        <br><br>
+        
+        <button id="upload-btn" onclick="uploadToIPFS()">Upload to IPFS</button>
+        
+        <div class="loading" id="loading" style="display: none;">
+            ⏳ Uploading to IPFS...
+        </div>
+
+        <div class="result" id="result" style="display: none;">
+            <strong>✅ File uploaded successfully!</strong>
+            <br><br>
+            <strong>IPFS Hash:</strong> <span id="ipfs-hash"></span>
+            <br><br>
+            <strong>File URL:</strong> 
+            <a id="ipfs-link" href="#" target="_blank" rel="noopener noreferrer">
+                Click to view file
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // File input change handler
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileInfo = document.getElementById('file-info');
+            const uploadBtn = document.getElementById('upload-btn');
+            
+            if (file) {
+                // Show file information
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('file-size').textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+                
+                // Enable upload button
+                uploadBtn.disabled = false;
+            } else {
+                fileInfo.style.display = 'none';
+                uploadBtn.disabled = true;
+            }
+        });
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Upload to IPFS function
+        async function uploadToIPFS() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert("Please select a file first!");
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('upload-btn').disabled = true;
+            document.getElementById('result').style.display = 'none';
+
+            const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+            let data = new FormData();
+            data.append("file", file);
+
+            try {
+                // ⚠️ REPLACE WITH YOUR ACTUAL PINATA CREDENTIALS ⚠️
+                const pinataApiKey = "ece8cca21aeba927c011";
+                const pinataSecretApiKey = "5b90154dee3df0120c291a8c535f8553888357a2034cce7201c82bcad0d2fcea";
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: data,
+                    headers: {
+                        'pinata_api_key': pinataApiKey,
+                        'pinata_secret_api_key': pinataSecretApiKey,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('IPFS Upload Result:', result);
+                
+                // Display result
+                document.getElementById('ipfs-hash').textContent = result.IpfsHash;
+                document.getElementById('ipfs-link').href = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
+                document.getElementById('ipfs-link').textContent = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
+                
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+
+                // Save to localStorage for future reference
+                const uploads = JSON.parse(localStorage.getItem('ipfsUploads') || '[]');
+                uploads.push({
+                    hash: result.IpfsHash,
+                    filename: file.name,
+                    timestamp: new Date().toISOString(),
+                    url: `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`
+                });
+                localStorage.setItem('ipfsUploads', JSON.stringify(uploads));
+
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert("❌ Upload failed: " + error.message);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('upload-btn').disabled = false;
+            }
+        }
+
+        // Initialize - disable upload button until file is selected
+        document.getElementById('upload-btn').disabled = true;
+    </script>
+</body>
+</html>

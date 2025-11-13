@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8e4d9 0%, #a4b5a0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f8f6f0; /* Beige background */
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 80vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 300px;
+            background: #6b8e6b; /* Sage green */
+            color: white;
+            padding: 0;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid #5a7a5a;
+        }
+
+        .section-header {
+            padding: 20px;
+            background: #5a7a5a; /* Darker sage green */
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header:hover {
+            background: #4a6a4a;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: white; /* White text for section headers */
+        }
+
+        .arrow {
+            transition: transform 0.3s ease;
+            color: white; /* White arrows */
+        }
+
+        .arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: #6b8e6b;
+        }
+
+        .section-content.expanded {
+            padding: 20px;
+            max-height: 1000px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            background: #f8f6f0; /* Beige */
+        }
+
+        .content-area {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #5a7a5a; /* Sage green text */
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1ccc0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            background: #fffdf6; /* Light beige */
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #6b8e6b; /* Sage green */
+            background: white;
+        }
+
+        .form-control:invalid {
+            border-color: #e74c3c;
+        }
+
+        .form-control:valid {
+            border-color: #27ae60;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #6b8e6b; /* Sage green */
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a7a5a;
+        }
+
+        .btn-success {
+            background: #8a9b6b; /* Olive green */
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #7a8b5b;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        /* Table Styles */
+        .credentials-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .credentials-table th,
+        .credentials-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .credentials-table th {
+            background: #5a7a5a; /* Sage green */
+            color: white;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .status-verified {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .file-upload {
+            border: 2px dashed #b8c6b1;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            background: #f8f6f0;
+        }
+
+        .file-upload:hover {
+            border-color: #6b8e6b;
+        }
+
+        .file-upload input {
+            margin: 15px 0;
+        }
+
+        /* Phone number validation styles */
+        .phone-hint {
+            font-size: 12px;
+            color: #d1ccc0;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        h2, h3, h4 {
+            color: #5a7a5a; /* Sage green headings */
+        }
+
+        p {
+            color: #666;
+        }
+
+        /* DID Display Styles */
+        .did-display {
+            background: #5a7a5a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .did-value {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #fff;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        .did-label {
+            color: #b8c6b1;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        /* DID Section Styles */
+        .did-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .did-section p {
+            color: white;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .did-section button {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- DID Display at the top -->
+            <div class="did-display">
+                <div class="did-label">YOUR DECENTRALIZED IDENTIFIER</div>
+                <div class="did-value" id="sidebar-did">did:user:9f3b2c1dA4...</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection('identity')">
+                    <h3>📱 My Identity</h3>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content expanded" id="identity-content">
+                    <!-- DID Section -->
+                    <div class="did-section">
+                        <label style="color: white;"><strong>DID:</strong></label>
+                        <p id="did-display">did:user:9f3b2c1dA4...</p>
+                        <button class="btn btn-secondary" onclick="generateDID()">Generate New DID</button>
+                    </div>
+
+                    <form id="identity-form">
+                        <div class="form-group">
+                            <label style="color: white;" for="fullName">Full Name</label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: white;" for="contactNumber">Contact Number</label>
+                            <input type="tel" id="contactNumber" class="form-control" 
+                                   placeholder="Enter 10-digit number" 
+                                   pattern="[0-9]{10}"
+                                   maxlength="10"
+                                   required>
+                            <div class="phone-hint">Must be exactly 10 digits</div>
+                            <div class="error-message" id="phone-error">Please enter a valid 10-digit phone number</div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="updateIdentity()" style="width: 100%;">
+                            Update Identity
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection('credentials')">
+                    <h3>📄 My Credentials</h3>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="credentials-content">
+                    <button type="button" class="btn btn-success" onclick="showContent('credentials-main')" style="width: 100%; margin-bottom: 15px;">
+                        Manage Credentials
+                    </button>
+                    <div style="font-size: 12px; color: #d1ccc0;">
+                        <p>📋 2 credentials pending</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header" onclick="toggleSection('upload')">
+                    <h3>☁️ Upload to IPFS</h3>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="upload-content">
+                    <div class="file-upload">
+                        <p>Upload documents to decentralized IPFS storage</p>
+                        <input type="file" class="form-control">
+                        <button type="button" class="btn btn-primary" onclick="showContent('upload-main')" style="width: 100%;">
+                            Upload Document
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Identity Content -->
+            <div id="identity-main" class="content-area active">
+                <h2>👤 My Identity</h2>
+                <p>Manage your personal identity information</p>
+                
+                <div class="did-display" style="background: #6b8e6b; max-width: 500px;">
+                    <div class="did-label">ACTIVE DECENTRALIZED IDENTIFIER</div>
+                    <div class="did-value" id="main-did">did:user:9f3b2c1dA4...</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 10px; margin-top: 20px; max-width: 500px;">
+                    <div class="form-group">
+                        <label for="displayFullName">Full Name</label>
+                        <input type="text" id="displayFullName" class="form-control" value="Not set" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="displayContactNumber">Contact Number</label>
+                        <input type="text" id="displayContactNumber" class="form-control" value="Not set" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Identity Status</label>
+                        <div style="padding: 10px; background: #fff3cd; border-radius: 5px; color: #856404;">
+                            ⚠️ Identity information pending
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credentials Content -->
+            <div id="credentials-main" class="content-area">
+                <h2>📄 My Credentials</h2>
+                <p>Manage your digital credentials and documents</p>
+                
+                <div class="did-display" style="background: #6b8e6b; margin-bottom: 20px;">
+                    <div class="did-label">VERIFICATION IDENTIFIER</div>
+                    <div class="did-value" id="credentials-did">did:user:9f3b2c1dA4...</div>
+                </div>
+
+                <table class="credentials-table">
+                    <thead>
+                        <tr>
+                            <th>Credential</th>
+                            <th>Issuer</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🆔 Aadhaar Card</td>
+                            <td>UIDAI, Government of India</td>
+                            <td>AADHAAR</td>
+                            <td class="status-pending">⏳ Pending</td>
+                            <td>
+                                <button class="btn btn-primary">View</button>
+                                <button class="btn">Cache</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>💳 PAN Card</td>
+                            <td>Income Tax Department, India</td>
+                            <td>PAN</td>
+                            <td class="status-pending">⏳ Pending</td>
+                            <td>
+                                <button class="btn btn-primary">View</button>
+                                <button class="btn">Cache</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 30px; background: white; padding: 25px; border-radius: 10px;">
+                    <h3>➕ Add New Credential</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="credentialType">Select Credential Type</label>
+                            <select id="credentialType" class="form-control">
+                                <option>Driving License</option>
+                                <option>Passport</option>
+                                <option>Voter ID</option>
+                                <option>Education Certificate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dlNumber">Document Number</label>
+                            <input type="text" id="dlNumber" class="form-control" placeholder="Enter document number">
+                        </div>
+                        <div class="form-group">
+                            <label for="state">Issuing Authority</label>
+                            <input type="text" id="state" class="form-control" placeholder="Enter issuing authority">
+                        </div>
+                        <div class="form-group">
+                            <label for="issueDate">Issue Date</label>
+                            <input type="date" id="issueDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="expiryDate">Expiry Date (if any)</label>
+                            <input type="date" id="expiryDate" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-success">Add Credential</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Upload Content -->
+            <div id="upload-main" class="content-area">
+                <h2>☁️ Document Storage</h2>
+                <p>Upload your documents to decentralized IPFS storage</p>
+
+                <div class="did-display" style="background: #6b8e6b; margin-bottom: 20px;">
+                    <div class="did-label">STORAGE IDENTIFIER</div>
+                    <div class="did-value" id="upload-did">did:user:9f3b2c1dA4...</div>
+                </div>
+                
+                <div class="file-upload" style="max-width: 500px; margin: 30px 0;">
+                    <h4>📤 Upload Document</h4>
+                    <input type="file" class="form-control" multiple>
+                    <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                        Upload to IPFS
+                    </button>
+                    <p style="margin-top: 15px; font-size: 12px; color: #7f8c8d;">
+                        🔒 Store documents securely on the blockchain
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 10px;">
+                    <h3>📂 Uploaded Documents</h3>
+                    <p style="color: #999; font-style: italic;">No documents uploaded yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate random DID
+        function generateDID() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let randomPart = '';
+            for (let i = 0; i < 12; i++) {
+                randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const newDID = `did:user:${randomPart}...`;
+            
+            // Update all DID displays
+            document.getElementById('did-display').textContent = newDID;
+            document.getElementById('sidebar-did').textContent = newDID;
+            document.getElementById('main-did').textContent = newDID;
+            document.getElementById('credentials-did').textContent = newDID;
+            document.getElementById('upload-did').textContent = newDID;
+            
+            alert('New DID generated successfully!');
+        }
+
+        // Toggle sidebar sections
+        function toggleSection(section) {
+            const content = document.getElementById(section + '-content');
+            const arrow = content.previousElementSibling.querySelector('.arrow');
+            
+            // Toggle current section
+            content.classList.toggle('expanded');
+            arrow.classList.toggle('expanded');
+        }
+
+        // Show main content based on sidebar click
+        function showContent(contentId) {
+            // Hide all content areas
+            const contentAreas = document.querySelectorAll('.content-area');
+            contentAreas.forEach(area => area.classList.remove('active'));
+            
+            // Show selected content area
+            document.getElementById(contentId).classList.add('active');
+        }
+
+        // Update identity information
+        function updateIdentity() {
+            const fullName = document.getElementById('fullName').value;
+            const contactNumber = document.getElementById('contactNumber').value;
+            
+            if (fullName && contactNumber.length === 10) {
+                document.getElementById('displayFullName').value = fullName;
+                document.getElementById('displayContactNumber').value = contactNumber;
+                
+                // Show success message
+                alert('Identity updated successfully!');
+                
+                // Switch to identity view
+                showContent('identity-main');
+            } else {
+                alert('Please fill all fields correctly. Phone must be 10 digits.');
+            }
+        }
+
+        // Phone number validation
+        document.getElementById('contactNumber').addEventListener('input', function(e) {
+            const phoneInput = e.target;
+            const errorElement = document.getElementById('phone-error');
+            const value = phoneInput.value.replace(/\D/g, ''); // Remove non-digits
+            
+            // Update input value with only numbers
+            phoneInput.value = value;
+            
+            // Validate length
+            if (value.length === 10) {
+                phoneInput.setCustomValidity('');
+                errorElement.style.display = 'none';
+            } else {
+                phoneInput.setCustomValidity('Phone number must be 10 digits');
+                errorElement.style.display = 'block';
+            }
+        });
+
+        // Prevent non-numeric input
+        document.getElementById('contactNumber').addEventListener('keypress', function(e) {
+            const charCode = e.which ? e.which : e.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                e.preventDefault();
+            }
+        });
+
+        // Initialize with identity section expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Identity section starts expanded
+            document.getElementById('identity-content').classList.add('expanded');
+            document.querySelector('#identity-content').previousElementSibling.querySelector('.arrow').classList.add('expanded');
+        });
+    </script>
+</body>
+</html>
