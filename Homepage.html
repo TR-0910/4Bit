@@ -6,7 +6,12 @@
     <title>CredSync - Privacy First, Security Always</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         :root {
             --primary: #40502f; /* Sage Green */
@@ -18,19 +23,10 @@
         }
 
         body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(-45deg, #e8e4d9, #a4b5a0, #d1ccc0, #8a9b6b);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
 
         .container {
             width: 90%;
