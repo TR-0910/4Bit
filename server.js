@@ -140,7 +140,19 @@ app.get('/login', (req, res) => {
 app.get('/Dash', (req, res) => {
     res.sendFile(path.join(__dirname, 'Dash.html'));
 });
-
+// Add this route handler for the root URL
+app.get('/', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>CredSync</title></head>
+            <body>
+                <h1>CredSync Server is Running! ✅</h1>
+                <p>Server is working properly on Render.</p>
+                <p>Check your specific routes for the actual application.</p>
+            </body>
+        </html>
+    `);
+});
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📧 Email OTP system ready!`);
