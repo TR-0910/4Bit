@@ -19,7 +19,7 @@ function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// ⚠️ REPLACE THESE WITH YOUR ACTUAL GMAIL CREDENTIALS ⚠️
+
 const emailConfig = {
     service: 'gmail',
     auth: {
